@@ -39,13 +39,26 @@ export function ChatInterface({ directMessages }) {
   const [error, setError] = useState(null)
   const [messageInput, setMessageInput] = useState("") // Declare messageInput
 
+  useEffect(() => {
+  if (selectedUser?.id) {
+    const newConversationId = selectedUser.id * currentUser.id
+    setData((prev) => ({
+      ...prev,
+      receiver_id: selectedUser.id,
+      sender_id: currentUser.id,
+      conversation_id: newConversationId,
+    }))
+  }
+}, [selectedUser, currentUser]) // runs whenever selectedUser changes
+
 
   // send messages
 
   const handleSendMessage = (e) => {
     e.preventDefault()
+    console.log("==================")
+    console.log(conversationId)
     if (!selectedUser?.id || !data.content.trim()) return
-
     post("/user/chat", {
       preserveScroll: true,
       onSuccess: () => {
@@ -69,7 +82,7 @@ export function ChatInterface({ directMessages }) {
       setError(null)
       console.log("[v0] Fetching messages for user:", userId)
       // NOTE: adjust this endpoint to your backend route
-      const res = await axios.get(`/api/direct-messages/${userId}`, {
+      const res = await axios.get(`/user/chat/direct_messages/${conversationId}`, {
         signal: controller?.signal,
       })
       // Accept either { messages: [...] } or raw array

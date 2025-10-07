@@ -11,6 +11,9 @@ Route::get('/', function () {
 Route::middleware(['web'])->group(function () {
     Route::prefix('user')->group(function () {
         Route::resource('chat',ChatMessageController::class);
+        Route::controller(ChatMessageController::class)->group(function () {
+            Route::get('chat/direct_messages/{id}','get_messages');
+        });
     });
     
     Route::prefix('auth')->group(function () {

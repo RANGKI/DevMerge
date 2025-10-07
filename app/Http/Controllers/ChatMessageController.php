@@ -74,4 +74,13 @@ class ChatMessageController extends Controller
     {
         //
     }
+
+    public function get_messages($id)
+    {
+        $messages = $this->service->get_messages($id);
+
+        return response()->json([
+            'messages' => $messages
+        ]);
+    }
 }
