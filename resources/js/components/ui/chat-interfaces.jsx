@@ -1,6 +1,9 @@
+"use client"
+
 // Change from Next.js imports:
 // import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import axios from "axios"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,63 +11,90 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Search, PenSquare, Hash, FileText, AtSign, Paperclip, Plus, Menu } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useForm, usePage } from "@inertiajs/react"
 
-// Mock data for direct messages
-// const directMessages = [
-//   { id: 1, name: "Ethan Anderson", avatar: "/man.jpg", initials: "EA" },
-//   { id: 2, name: "Noah Martinez", avatar: "/man-beard.jpg", initials: "NM", active: true },
-//   { id: 3, name: "Olivia Mitchell", avatar: "/woman-red.jpg", initials: "OM" },
-//   { id: 4, name: "Ava Williams", avatar: "/woman-dark.jpg", initials: "AW" },
-//   { id: 5, name: "Liam Johnson", avatar: "/man-dark.jpg", initials: "LJ" },
-//   { id: 6, name: "Benjamin Parker", avatar: "/man-brown.jpg", initials: "BP" },
-//   { id: 7, name: "Olivia Adams", avatar: "/woman-blonde.jpg", initials: "OA" },
-//   { id: 8, name: "Sophie Jones", avatar: "/woman-brunette.jpg", initials: "SJ" },
-// ]
 
-// Mock messages
-const messages = [
-  {
-    id: 1,
-    sender: "Noah Martinez",
-    content: "Hey Amanda, are you around? 🙂",
-    timestamp: "09:03 AM",
-    avatar: "/man-beard.jpg",
-    initials: "NM",
-    isOwn: false,
-  },
-  {
-    id: 2,
-    sender: "You",
-    content: "Hey 👋 What's up?",
-    timestamp: "09:03 AM",
-    isOwn: true,
-  },
-  {
-    id: 3,
-    sender: "Noah Martinez",
-    content:
-      "Do you mind sending me the brief for the new campaign? Ethan told me about it and I want to go over it with him.",
-    timestamp: "09:08 AM",
-    avatar: "/man-beard.jpg",
-    initials: "NM",
-    isOwn: false,
-  },
-  {
-    id: 4,
-    sender: "You",
-    content: "Of course. I'll go through the specs and get back to you shortly.",
-    timestamp: "09:11 AM",
-    isOwn: true,
-  },
-]
-
-export function ChatInterface({directMessages}) {
+export function ChatInterface({ directMessages }) {
   console.log(directMessages)
+  const { props } = usePage()
   const [selectedUser, setSelectedUser] = useState(
-  directMessages?.[0] || { id: null, name: "", avatar: "", initials: "" }
+    directMessages?.[0] || { id: null, name: "", avatar: "", initials: "" },
   )
 
-  const [messageInput, setMessageInput] = useState("")
+  const currentUser = props.auth.user
+  console.log(currentUser)
+  const conversationId = selectedUser && currentUser
+    ? selectedUser.id * currentUser.id
+    : null
+  const { data, setData, post, processing, reset, errors } = useForm({
+    content: "",
+    receiver_id: selectedUser?.id,
+    sender_id: currentUser.id,
+    conversation_id: conversationId,
+  })
+
+  // Replace static messages with state and request flags
+  const [messages, setMessages] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [messageInput, setMessageInput] = useState("") // Declare messageInput
+
+
+  // send messages
+
+  const handleSendMessage = (e) => {
+    e.preventDefault()
+    if (!selectedUser?.id || !data.content.trim()) return
+
+    post("/user/chat", {
+      preserveScroll: true,
+      onSuccess: () => {
+        // Reset the input field after successful send
+        reset('content')
+        // Optionally fetch new messages after sending
+        fetchMessages(selectedUser?.id)
+      },
+      onError: (err) => {
+        console.error("Send message error:", err)
+        setError("Failed to send message")
+      },
+    })
+  }
+
+  // Fetch helper with cancellation
+  const fetchMessages = async (userId, controller) => {
+    if (!userId) return
+    try {
+      setLoading(true)
+      setError(null)
+      console.log("[v0] Fetching messages for user:", userId)
+      // NOTE: adjust this endpoint to your backend route
+      const res = await axios.get(`/api/direct-messages/${userId}`, {
+        signal: controller?.signal,
+      })
+      // Accept either { messages: [...] } or raw array
+      console.log("messages",res)
+      const next = Array.isArray(res.data) ? res.data : res.data?.messages || []
+      setMessages(next)
+      console.log("[v0] Messages received:", next.length)
+    } catch (err) {
+      if (axios.isCancel?.(err)) {
+        console.log("[v0] Request canceled")
+        return
+      }
+      console.log("[v0] Fetch error:", err?.message)
+      setError("Failed to load messages")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Trigger fetch when selected user changes
+  useEffect(() => {
+    const controller = new AbortController()
+    fetchMessages(selectedUser?.id, controller)
+    return () => controller.abort()
+  }, [selectedUser?.id])
 
   return (
     <div className="flex h-screen bg-background">
@@ -166,76 +196,111 @@ export function ChatInterface({directMessages}) {
         {/* Messages Area */}
         <ScrollArea className="flex-1 px-6 py-4">
           <div className="max-w-4xl mx-auto space-y-6">
+            {loading && (
+              <div className="flex items-center justify-center py-8">
+                <span className="text-sm text-muted-foreground">Loading messages…</span>
+              </div>
+            )}
+            {!loading && error && (
+              <div className="flex items-center justify-center py-8">
+                <span className="text-sm text-red-600">{error}</span>
+              </div>
+            )}
+            {!loading && !error && messages.length === 0 && (
+              <div className="flex items-center justify-center py-8">
+                <span className="text-sm text-muted-foreground">
+                  {selectedUser?.id ? "No messages yet." : "Select a user to view messages."}
+                </span>
+              </div>
+            )}
+
             {/* Date Separator */}
-            <div className="flex items-center justify-center">
-              <span className="text-xs text-muted-foreground bg-background px-3 py-1 rounded-full">
-                Wednesday, July 26th
-              </span>
-            </div>
+            {!loading && !error && messages.length > 0 && (
+              <div className="flex items-center justify-center">
+                <span className="text-xs text-muted-foreground bg-background px-3 py-1 rounded-full">
+                  Wednesday, July 26th
+                </span>
+              </div>
+            )}
 
-            {/* Messages */}
-            {messages.map((message) => (
-              <div key={message.id} className={cn("flex gap-3", message.isOwn && "justify-end")}>
-                {!message.isOwn && (
-                  <Avatar className="h-10 w-10 flex-shrink-0">
-                    <AvatarImage src={message.avatar || "/placeholder.svg"} alt={message.sender} />
-                    <AvatarFallback>{message.initials}</AvatarFallback>
-                  </Avatar>
-                )}
+            {!loading &&
+              !error &&
+              messages.map((message) => (
+                <div key={message.id} className={cn("flex gap-3", message.isOwn && "justify-end")}>
+                  {!message.isOwn && (
+                    <Avatar className="h-10 w-10 flex-shrink-0">
+                      <AvatarImage src={message.avatar || "/placeholder.svg"} alt={message.sender} />
+                      <AvatarFallback>{message.initials}</AvatarFallback>
+                    </Avatar>
+                  )}
 
-                <div className={cn("flex flex-col gap-1 max-w-xl", message.isOwn && "items-end")}>
-                  <div
-                    className={cn(
-                      "rounded-2xl px-4 py-3",
-                      message.isOwn
-                        ? "bg-accent text-foreground"
-                        : "bg-purple-100 dark:bg-purple-900/30 text-foreground",
-                    )}
-                  >
-                    <p className="text-sm leading-relaxed">{message.content}</p>
+                  <div className={cn("flex flex-col gap-1 max-w-xl", message.isOwn && "items-end")}>
+                    <div
+                      className={cn(
+                        "rounded-2xl px-4 py-3",
+                        message.isOwn
+                          ? "bg-accent text-foreground"
+                          : "bg-purple-100 dark:bg-purple-900/30 text-foreground",
+                      )}
+                    >
+                      <p className="text-sm leading-relaxed">{message.content}</p>
+                    </div>
+                    <div className="flex items-center gap-2 px-2">
+                      {!message.isOwn && <span className="text-xs font-medium text-foreground">{message.sender}</span>}
+                      <span className="text-xs text-muted-foreground">{message.timestamp}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 px-2">
-                    {!message.isOwn && <span className="text-xs font-medium text-foreground">{message.sender}</span>}
-                    <span className="text-xs text-muted-foreground">{message.timestamp}</span>
+                </div>
+              ))}
+
+            {/* Typing Indicator (optional) */}
+            {!loading && !error && messages.length > 0 && (
+              <div className="flex gap-3">
+                <Avatar className="h-10 w-10 flex-shrink-0">
+                  <AvatarImage src={selectedUser?.avatar || "/placeholder.svg"} alt={selectedUser?.name} />
+                  <AvatarFallback>{selectedUser?.initials}</AvatarFallback>
+                </Avatar>
+                <div className="flex items-center gap-1 bg-accent rounded-2xl px-4 py-3">
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                    <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                    <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></span>
                   </div>
                 </div>
               </div>
-            ))}
-
-            {/* Typing Indicator */}
-            <div className="flex gap-3">
-              <Avatar className="h-10 w-10 flex-shrink-0">
-                <AvatarImage src="/man-beard.jpg" alt="Noah Martinez" />
-                <AvatarFallback>NM</AvatarFallback>
-              </Avatar>
-              <div className="flex items-center gap-1 bg-accent rounded-2xl px-4 py-3">
-                <div className="flex gap-1">
-                  <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                  <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                  <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></span>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </ScrollArea>
 
         {/* Message Input */}
-        <div className="border-t border-border p-4 bg-card">
-          <div className="max-w-4xl mx-auto flex items-center gap-3">
-            <div className="flex-1 flex items-center gap-2 bg-background border border-border rounded-lg px-4 py-3">
-              <Input
-                value={messageInput}
-                onChange={(e) => setMessageInput(e.target.value)}
-                placeholder={`Message ${selectedUser.name}`}
-                className="flex-1 border-0 bg-transparent p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-              />
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Plus className="h-5 w-5" />
+        <form onSubmit={handleSendMessage}>
+          <div className="border-t border-border p-4 bg-card">
+            <div className="max-w-4xl mx-auto flex items-center gap-3">
+              <div className="flex-1 flex items-center gap-2 bg-background border border-border rounded-lg px-4 py-3">
+                <Input
+                  value={data.content}
+                  onChange={(e) => setData('content', e.target.value)}
+                  placeholder={`Message ${selectedUser.name}`}
+                  className="flex-1 border-0 bg-transparent p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  disabled={processing}
+                />
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Plus className="h-5 w-5" />
+                </Button>
+              </div>
+              <Button 
+                type="submit" 
+                className="bg-foreground text-background hover:bg-foreground/90 px-6" 
+                disabled={processing || !data.content.trim()}
+              >
+                Send
               </Button>
             </div>
-            <Button className="bg-foreground text-background hover:bg-foreground/90 px-6">Send</Button>
+            {errors.content && (
+              <p className="text-red-600 text-sm mt-2">{errors.content}</p>
+            )}
           </div>
-        </div>
+        </form>
       </div>
     </div>
   )

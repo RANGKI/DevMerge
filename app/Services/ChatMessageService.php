@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\ChatMessage;
 use App\Models\User;
 
 class ChatMessageService
@@ -26,5 +27,15 @@ class ChatMessageService
                 'active' => $user->id === 1,
             ];
         })->toArray();
+    }
+
+    public function store_message($content,$receiver_id,$sender_id,$conversation_id) {
+        $chat = new ChatMessage;
+        // dd($content,$receiver_id,$sender_id,$conversation_id);
+        $chat->sender_id = $sender_id;
+        $chat->receiver_id = $receiver_id;
+        $chat->message = $content;
+        $chat->conversation_id = hash('sha256', $conversation_id);
+        $chat->save();
     }
 }

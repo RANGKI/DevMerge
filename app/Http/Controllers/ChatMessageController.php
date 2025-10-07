@@ -17,10 +17,11 @@ class ChatMessageController extends Controller
      */
     public function index()
     {
+        // dd(auth()->check(), auth()->user());
         // dd($this->service->get_users());
         $directMessages = $this->service->get_users();
         return inertia('Chat',[
-            'directMessages' => $directMessages
+            'directMessages' => $directMessages,
         ]);
     }
 
@@ -37,7 +38,9 @@ class ChatMessageController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // dd($request->all());
+        $this->service->store_message($request->input('content'),$request->input('receiver_id'),$request->input('sender_id'),$request->input('conversation_id'),);
+        return back()->with('success', 'Message sent successfully!');
     }
 
     /**

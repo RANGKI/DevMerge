@@ -8,10 +8,13 @@ Route::get('/', function () {
     return inertia('Home');
 });
 
-Route::prefix('user')->group(function () {
-    Route::resource('chat',ChatMessageController::class);
+Route::middleware(['web'])->group(function () {
+    Route::prefix('user')->group(function () {
+        Route::resource('chat',ChatMessageController::class);
+    });
+    
+    Route::prefix('auth')->group(function () {
+        Route::resource('login',UserController::class);
+    });
 });
 
-Route::prefix('auth')->group(function () {
-    Route::resource('login',UserController::class);
-});
