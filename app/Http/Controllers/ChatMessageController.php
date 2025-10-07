@@ -12,7 +12,7 @@ class ChatMessageController extends Controller
      */
     public function index()
     {
-        //
+        return inertia('Chat');
     }
 
     /**
