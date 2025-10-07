@@ -10,16 +10,16 @@ import { Search, PenSquare, Hash, FileText, AtSign, Paperclip, Plus, Menu } from
 import { cn } from "@/lib/utils"
 
 // Mock data for direct messages
-const directMessages = [
-  { id: 1, name: "Ethan Anderson", avatar: "/man.jpg", initials: "EA" },
-  { id: 2, name: "Noah Martinez", avatar: "/man-beard.jpg", initials: "NM", active: true },
-  { id: 3, name: "Olivia Mitchell", avatar: "/woman-red.jpg", initials: "OM" },
-  { id: 4, name: "Ava Williams", avatar: "/woman-dark.jpg", initials: "AW" },
-  { id: 5, name: "Liam Johnson", avatar: "/man-dark.jpg", initials: "LJ" },
-  { id: 6, name: "Benjamin Parker", avatar: "/man-brown.jpg", initials: "BP" },
-  { id: 7, name: "Olivia Adams", avatar: "/woman-blonde.jpg", initials: "OA" },
-  { id: 8, name: "Sophie Jones", avatar: "/woman-brunette.jpg", initials: "SJ" },
-]
+// const directMessages = [
+//   { id: 1, name: "Ethan Anderson", avatar: "/man.jpg", initials: "EA" },
+//   { id: 2, name: "Noah Martinez", avatar: "/man-beard.jpg", initials: "NM", active: true },
+//   { id: 3, name: "Olivia Mitchell", avatar: "/woman-red.jpg", initials: "OM" },
+//   { id: 4, name: "Ava Williams", avatar: "/woman-dark.jpg", initials: "AW" },
+//   { id: 5, name: "Liam Johnson", avatar: "/man-dark.jpg", initials: "LJ" },
+//   { id: 6, name: "Benjamin Parker", avatar: "/man-brown.jpg", initials: "BP" },
+//   { id: 7, name: "Olivia Adams", avatar: "/woman-blonde.jpg", initials: "OA" },
+//   { id: 8, name: "Sophie Jones", avatar: "/woman-brunette.jpg", initials: "SJ" },
+// ]
 
 // Mock messages
 const messages = [
@@ -58,8 +58,12 @@ const messages = [
   },
 ]
 
-export function ChatInterface() {
-  const [selectedUser, setSelectedUser] = useState(directMessages[1])
+export function ChatInterface({directMessages}) {
+  console.log(directMessages)
+  const [selectedUser, setSelectedUser] = useState(
+  directMessages?.[0] || { id: null, name: "", avatar: "", initials: "" }
+  )
+
   const [messageInput, setMessageInput] = useState("")
 
   return (

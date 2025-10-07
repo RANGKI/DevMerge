@@ -1,5 +1,5 @@
-import { ChatInterface } from "@/components/ui/chat-interfaces"
+import { ChatInterface } from "@/components/ui/chat-interfaces";
 
-export default function Home() {
-  return <ChatInterface />
+export default function Home({ directMessages }) { 
+  return <ChatInterface directMessages={directMessages} />;
 }

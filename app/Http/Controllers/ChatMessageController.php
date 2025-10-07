@@ -3,16 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChatMessage;
+use App\Services\ChatMessageService;
 use Illuminate\Http\Request;
 
 class ChatMessageController extends Controller
 {
+    public function __construct(public ChatMessageService $service)
+    {
+        
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return inertia('Chat');
+        // dd($this->service->get_users());
+        $directMessages = $this->service->get_users();
+        return inertia('Chat',[
+            'directMessages' => $directMessages
+        ]);
     }
 
     /**
