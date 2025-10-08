@@ -1,61 +1,94 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# DevMerge 🛠️💬
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> **A real-time developer collaboration hub powered by GitHub activity**
 
-## About Laravel
+DevMerge is an in-development Laravel web application that creates **two synchronized chat groups** from any **public GitHub repository**:
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+1. **General Chat** – A standard group chat for developers to communicate freely.
+2. **Activity Feed** – An automated announcement channel that tracks and broadcasts key GitHub events such as:
+   - 🚀 Latest **pushes**
+   - 🔁 Latest **pulls**
+   - 🔄 Latest **merges**
+   - ⚠️ Latest **merge conflicts**
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+The goal? **Reduce context switching** and **improve team awareness** by bringing critical repository activity directly into a live, conversational interface—so developers always know what’s happening, who’s working on what, and when action is needed.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 🌟 Key Features (Planned / In Progress)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **GitHub Webhook Integration** – Listen to real-time events from public repos (push, pull_request, merge, etc.).
+- **Dual-Channel Chat UI** – Separate but linked channels for discussion and system alerts.
+- **Real-Time Broadcasting** – Powered by Laravel Echo + Reverb (or Pusher/Ably) for instant updates.
+- **User Authentication** – Developers log in (via GitHub OAuth or standard auth) to join repo-specific rooms.
+- **Repository Context Awareness** – All chats are scoped to a specific public GitHub repository.
+- **Conflict Alerts** – Detect and notify when merge conflicts arise (via PR status or CI signals).
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🛠️ Built with Laravel
 
-## Laravel Sponsors
+DevMerge leverages the full power of the Laravel ecosystem:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- ✅ **Routing** – Clean, expressive route definitions ([docs](https://laravel.com/docs/routing))
+- ✅ **Service Container** – Automatic dependency injection for testable, maintainable code ([docs](https://laravel.com/docs/container))
+- ✅ **Eloquent ORM** – Elegant database interactions ([docs](https://laravel.com/docs/eloquent))
+- ✅ **Database Migrations** – Safe, version-controlled schema changes ([docs](https://laravel.com/docs/migrations))
+- ✅ **Queues** – Background processing for webhook handling and notifications ([docs](https://laravel.com/docs/queues))
+- ✅ **Broadcasting** – Real-time event streaming to connected clients ([docs](https://laravel.com/docs/broadcasting))
+- ✅ **Caching & Sessions** – Optimized performance and user state management ([docs](https://laravel.com/docs/cache), [docs](https://laravel.com/docs/session))
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## 🚧 Status: Under Active Development
 
-## Contributing
+DevMerge is **not yet production-ready**. Core features like GitHub webhook ingestion, real-time chat, and conflict detection are being built iteratively.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+> ⚠️ **This is a passion project** – contributions, feedback, and feature suggestions are welcome!
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 🚀 Getting Started (Coming Soon)
 
-## Security Vulnerabilities
+Once the initial version is ready, setup will include:
+1. Clone the repo
+2. Configure GitHub OAuth & webhooks
+3. Set up broadcasting (Reverb/Pusher)
+4. Run migrations & queue workers
+5. Start chatting!
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+*(Detailed instructions will be added soon.)*
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 💡 Why DevMerge?
+
+Many dev teams use Discord, Slack, or Teams—but these tools **don’t natively understand Git workflows**. DevMerge bridges that gap by **turning repository events into actionable, contextual conversations**, helping teams stay in sync without leaving their collaboration space.
+
+Think of it as **“Slack, but Git-aware.”**
+
+---
+
+## 🤝 Contributing
+
+While still in early stages, we welcome:
+- Feature ideas
+- UX/UI suggestions
+- Code contributions (once architecture stabilizes)
+- Testing on real-world repos
+
+Check the [issues](https://github.com/your-username/devmerge/issues) tab to see what’s being worked on!
+
+---
+
+## 📄 License
+
+DevMerge is open-source software licensed under the [MIT License](https://opensource.org/licenses/MIT).
+
+---
+
+*Built with ❤️ and Laravel — because developers deserve better collaboration tools.*  
+
+--- 
+
+Let me know if you'd like a version optimized for GitHub (with badges, screenshots placeholder, or installation commands), or if you want to highlight specific tech (e.g., Livewire, Inertia, Vue, etc.)!
