@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\MessageSent;
 use App\Models\ChatMessage;
 use App\Services\ChatMessageService;
 use Illuminate\Http\Request;
@@ -39,7 +40,8 @@ class ChatMessageController extends Controller
     public function store(Request $request)
     {
         // dd($request->all());
-        $this->service->store_message($request->input('content'),$request->input('receiver_id'),$request->input('sender_id'),$request->input('conversation_id'),);
+        $message = $this->service->store_message($request->input('content'),$request->input('receiver_id'),$request->input('sender_id'),$request->input('conversation_id'),);
+        broadcast(new MessageSent($message))->toOthers();
         return back()->with('success', 'Message sent successfully!');
     }
 

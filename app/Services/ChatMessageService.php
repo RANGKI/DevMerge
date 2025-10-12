@@ -40,6 +40,7 @@ class ChatMessageService
         // dd($enc_id);
         $chat->save();
         // dd($chat);
+        return $chat;
     }
 
     public function get_messages($conversation_id)
