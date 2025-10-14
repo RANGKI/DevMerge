@@ -51,6 +51,33 @@ export function ChatInterface({ directMessages }) {
   }
 }, [selectedUser, currentUser]) // runs whenever selectedUser changes
 
+  useEffect(() => {
+  if (!currentUser.id) return;
+
+  const channel = window.Echo.private(`App.Models.User.${currentUser.id}`)
+    .listen(".MessageSent", (event) => {
+      console.log("💬 New message received via broadcast:", event);
+
+      // if your broadcast sends { data: {...message fields...} }
+      let newMessage = event.receiver
+      // console.log("***********")
+      // console.log(channel)
+      
+      // console.log(newMessage.conversation_id === conversationId)
+      console.log(event.sender_id == currentUser.id)
+      if (event.sender_id == currentUser.id) {
+        newMessage = event.sender
+      }
+      console.log(newMessage)
+      setMessages((prev) => [...prev, newMessage]);
+    });
+
+  return () => {
+    channel.stopListening(".MessageSent");
+  };
+}, [currentUser.id, conversationId]);
+
+
 
   // send messages
 
@@ -63,9 +90,11 @@ export function ChatInterface({ directMessages }) {
       preserveScroll: true,
       onSuccess: () => {
         // Reset the input field after successful send
-        reset('content')
+        // reset('content')
         // Optionally fetch new messages after sending
-        fetchMessages(selectedUser?.id)
+        // const controller = new AbortController()
+        // fetchMessages(selectedUser?.id, 'a',props.auth.user.id)
+        // controller.abort()
       },
       onError: (err) => {
         console.error("Send message error:", err)
@@ -75,14 +104,17 @@ export function ChatInterface({ directMessages }) {
   }
 
   // Fetch helper with cancellation
-  const fetchMessages = async (userId, controller) => {
+  const fetchMessages = async (userId, controller,currentUserId) => {
     if (!userId) return
     try {
       setLoading(true)
       setError(null)
+      console.log('((((((((((((((((((')
+      console.log(currentUserId)
+      console.log('((((((((((((((((((')
       console.log("[v0] Fetching messages for user:", userId)
       // NOTE: adjust this endpoint to your backend route
-      const res = await axios.get(`/user/chat/direct_messages/${conversationId}`, {
+      const res = await axios.get(`/user/chat/direct_messages/${currentUserId}-${conversationId}`, {
         signal: controller?.signal,
       })
       // Accept either { messages: [...] } or raw array
@@ -105,7 +137,7 @@ export function ChatInterface({ directMessages }) {
   // Trigger fetch when selected user changes
   useEffect(() => {
     const controller = new AbortController()
-    fetchMessages(selectedUser?.id, controller)
+    fetchMessages(selectedUser?.id, controller,props.auth.user.id)
     return () => controller.abort()
   }, [selectedUser?.id])
 

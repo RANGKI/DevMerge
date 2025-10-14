@@ -43,10 +43,11 @@ class ChatMessageService
         return $chat;
     }
 
-    public function get_messages($conversation_id)
+    public function get_messages($conversation_id,$own_id)
     {
-        $currentUserId = auth()->user()->id;
-
+        // dd(auth()->user()->id);
+        $currentUserId = $own_id;
+        // dd($currentUserId);
         $messages = ChatMessage::with(['sender', 'receiver'])
             ->where('conversation_id', hash('sha256', $conversation_id))
             ->orderBy('created_at', 'asc')
@@ -55,7 +56,7 @@ class ChatMessageService
         // dd($messages);
         return $messages->map(function ($message) use ($currentUserId) {
             $isOwn = $message->sender_id === $currentUserId;
-            // dd($currentUserId);
+            // dd($isOwn,$message->sender_id,$currentUserId);
 
             if ($isOwn) {
                 return [
